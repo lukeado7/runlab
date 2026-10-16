@@ -1,0 +1,98 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RunLab</title><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#0f766e">
+<style>
+:root{--bg:#f4f6f7;--c:#fff;--t:#14171c;--m:#6b7280;--a:#0f766e;--b:#e1e5e9;--ok:#15803d;--no:#b45309}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1013;--c:#181b20;--t:#eceef1;--m:#9aa1ab;--a:#2dd4bf;--b:#2a2f37;--ok:#4ade80;--no:#fbbf24}}
+*{box-sizing:border-box}body{margin:0;font:16px system-ui,sans-serif;background:var(--bg);color:var(--t);padding:env(safe-area-inset-top) 0 calc(64px + env(safe-area-inset-bottom))}
+#v{max-width:640px;margin:auto;padding:12px}.card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:12px;margin-bottom:12px}
+h3{margin:4px 0 8px;font-size:15px}label{display:block;font-size:12px;color:var(--m);margin-bottom:2px}.m{color:var(--m);font-size:13px}
+input,select,button{font:inherit;padding:9px;border:1px solid var(--b);border-radius:10px;background:var(--bg);color:var(--t);width:100%;min-width:0}
+button{background:var(--a);color:#fff;border:0;font-weight:600;width:auto;cursor:pointer}button.x{background:none;color:var(--m);padding:2px 8px}
+.row{display:flex;gap:8px}.g2,.g3{display:grid;gap:8px;margin-bottom:8px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}
+.big{font-size:20px;font-weight:700}.k{text-align:center;background:var(--bg);border-radius:10px;padding:8px}
+.seg{display:flex;gap:6px;margin-bottom:12px}.seg button{flex:1;background:var(--c);color:var(--t);border:1px solid var(--b)}.seg .on{background:var(--a);color:#fff}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 4px;border-bottom:1px solid var(--b);text-align:left}
+.r{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--b);font-size:14px}.r b{text-align:right}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--c);border-top:1px solid var(--b);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;color:var(--m);border-radius:0;padding:12px 4px;font-size:13px}nav .on{color:var(--a)}
+.ok{color:var(--ok)}.no{color:var(--no)}
+</style></head><body><div id="v"></div>
+<nav><button data-t=a onclick="go('a')">Atleta</button><button data-t=z onclick="go('z')">Zone</button><button data-t=h onclick="go('h')">HIIT</button><button data-t=s onclick="go('s')">Piano</button></nav>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let S={ath:[],sel:null,ses:[]};try{S=JSON.parse(localStorage.getItem('runlab'))||S}catch(e){}
+const save=()=>{try{localStorage.setItem('runlab',JSON.stringify(S))}catch(e){}};
+const A=()=>S.ath.find(a=>a.id==S.sel),today=()=>new Date().toISOString().slice(0,10);
+const mas=a=>{if(!a||!a.tests.length)return 0;return [...a.tests].sort((x,y)=>x.d<y.d?1:-1)[0].m/360},MT=()=>mas(A())*1.05;
+const tf=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')},pf=v=>v?tf(1000/v):'–',n0=x=>Math.round(x).toLocaleString('it');
+// zone % MAStraining (lower,upper) e zone di Friel (rapporto passo lento, veloce rispetto alla soglia)
+const ZP=[['1',null,.6],['2',.6,.7],['3',.7,.8],['4',.8,.9],['5a',.9,1],['5b',1,1.1],['5c',1.1,null]];
+const ZF=[['1',null,1.29],['2',1.29,1.14],['3',1.13,1.06],['4',1.05,.99],['5a',1,.97],['5b',.96,.9],['5c',.9,null]];
+const zoneOf=r=>{for(const z of ZP)if((z[1]==null||r>=z[1])&&(z[2]==null||r<z[2]))return z[0]};
+const noMT='<div class=card><p class=m>Aggiungi un atleta e un test MAS 6\' nella scheda Atleta.</p></div>';
+let tab='a';
+function go(t){if(t)tab=t;$('#v').innerHTML={a:vAth,z:vZone,h:vHiit,s:vSes}[tab]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));if(tab=='h')hr()}
+/* GRAFICI + DATI */
+function ch(L,ser,u){const all=ser.flatMap(s=>s.d.filter(x=>x!=null));if(L.length<2||!all.length)return'<p class=m>Servono almeno 2 punti per il grafico.</p>';
+const W=320,Hh=120,p=26,mn=Math.min(...all),mx=Math.max(...all),r=mx-mn||1,X=i=>p+i*(W-2*p)/(L.length-1),Y=v=>Hh-p-(v-mn)/r*(Hh-2*p),t=(x,y,s,a)=>`<text x=${x} y=${y} font-size=10 text-anchor=${a} style="fill:var(--m)">${s}</text>`;
+return`<svg viewBox="0 0 ${W} ${Hh+4}" style="width:100%;display:block"><line x1=${p} x2=${W-p} y1=${Hh-p} y2=${Hh-p} style="stroke:var(--b)"/>`+ser.map(s=>{const q=s.d.map((v,i)=>v==null?null:[X(i),Y(v)]).filter(Boolean);return`<polyline fill=none stroke-width=2 style="stroke:${s.c}" points="${q.map(z=>z.join(',')).join(' ')}"/>`+q.map(z=>`<circle cx=${z[0]} cy=${z[1]} r=3 style="fill:${s.c}"/>`).join('')}).join('')+t(2,12,mx.toFixed(1)+u,'start')+t(2,Hh-p-2,mn.toFixed(1)+u,'start')+t(p,Hh-8,L[0],'start')+t(W-p,Hh-8,L[L.length-1],'end')+'</svg>'}
+function bars(K,W){const w=320,h=130,p=26,mx=Math.max(1,...K.map(k=>Math.max(W[k].p,W[k].b+W[k].a))),bw=Math.min(28,(w-2*p)/K.length*.6),Y=v=>h-p-v/mx*(h-p-14),X=i=>p+(i+.5)*(w-2*p)/K.length,t=(x,y,s)=>`<text x=${x} y=${y} font-size=10 text-anchor=middle style="fill:var(--m)">${s}</text>`;
+return`<svg viewBox="0 0 ${w} ${h+4}" style="width:100%;display:block"><line x1=${p} x2=${w-p} y1=${h-p} y2=${h-p} style="stroke:var(--b)"/>`+K.map((k,i)=>{const d=W[k],x=X(i)-bw/2,yb=Y(d.b),ya=Y(d.b+d.a),T=d.a+d.b;return`<rect x=${x} y=${yb} width=${bw} height=${h-p-yb} style="fill:var(--a)"/><rect x=${x} y=${ya} width=${bw} height=${yb-ya} style="fill:#ea580c"/>`+(d.p?`<line x1=${x-3} x2=${x+bw+3} y1=${Y(d.p)} y2=${Y(d.p)} stroke-width=2 style="stroke:var(--t)"/>`:'')+(T?t(X(i),ya-3,T.toFixed(1)):'')+t(X(i),h-10,k)}).join('')+'</svg>'}
+const wk=d=>{const x=new Date(d);x.setUTCDate(x.getUTCDate()-(x.getUTCDay()+6)%7);return x.toISOString().slice(5,10)};
+function dl(n,t,m){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:m}));a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e3)}
+const expJ=()=>dl('runlab-backup-'+today()+'.json',JSON.stringify(S),'application/json');
+function expC(){const q=x=>'"'+String(x??'').replace(/"/g,'""')+'"',r=[['Atleta','Data','Tipo','Zona','km previsti','min previsti','Note','km fatti','min fatti','RPE']];S.ses.forEach(s=>r.push([S.ath.find(a=>a.id==s.a)?.name,s.d,s.t,s.z,s.pk,s.pm,s.n,s.ak,s.am,s.rpe]));dl('runlab-piano.csv','\ufeff'+r.map(x=>x.map(q).join(';')).join('\n'),'text/csv')}
+function impJ(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.ath)||!Array.isArray(d.ses))throw 0;if(!confirm('Sostituire i dati attuali con il backup?'))return;S=d;S.sel=S.sel||S.ath[0]?.id;save();go()}catch(e){alert('File non valido')}};r.readAsText(f)}
+const dc=()=>`<div class=card><h3>Dati</h3><div class=row><button onclick=expJ()>Backup JSON</button><button onclick=expC()>Piano CSV</button><button onclick="$('#imp').click()">Importa</button></div><input id=imp type=file accept=".json,application/json" hidden onchange="impJ(this.files[0])"></div>`;
+/* ATLETA */
+function addAth(){const n=prompt('Nome atleta');if(!n)return;const a={id:Date.now(),name:n,tests:[]};S.ath.push(a);S.sel=a.id;save();go()}
+function delAth(){if(confirm('Eliminare atleta e piano?')){S.ses=S.ses.filter(s=>s.a!=S.sel);S.ath=S.ath.filter(a=>a.id!=S.sel);S.sel=S.ath[0]?.id;save();go()}}
+function addT(){const m=+$('#tm').value;if(!m)return;A().tests.push({d:$('#td').value||today(),m});save();go()}
+function delT(i){A().tests.splice(i,1);save();go()}
+function vAth(){const a=A();let h=`<div class=card><label>Atleta</label><div class=row><select onchange="S.sel=this.value;save();go()">${S.ath.map(x=>`<option value=${x.id} ${x.id==S.sel?'selected':''}>${esc(x.name)}</option>`).join('')}</select><button onclick=addAth()>+ Nuovo</button></div></div>`;
+if(!a)return h+'<p class=m>Crea un atleta per iniziare.</p>'+dc();const m=mas(a);
+h+=`<div class=card><h3>Test MAS 6 minuti</h3><div class=row><input id=td type=date value=${today()}><input id=tm type=number inputmode=numeric placeholder="Metri in 6'"><button onclick=addT()>Aggiungi</button></div>`;
+h+=[...a.tests].map((t,i)=>[t,i]).sort((x,y)=>x[0].d<y[0].d?1:-1).map(([t,i])=>`<div class=r><span>${t.d} · ${t.m} m</span><span>${pf(t.m/360)}/km <button class=x onclick=delT(${i})>✕</button></span></div>`).join('')+'</div>';
+if(m)h+=`<div class=g3><div class=k><label>MAS</label><b>${m.toFixed(2)} m/s</b><div class=m>${pf(m)}/km</div></div><div class=k><label>km/h</label><b>${(m*3.6).toFixed(1)}</b></div><div class=k><label>MAS training +5%</label><b>${(m*1.05).toFixed(2)} m/s</b><div class=m>${pf(m*1.05)}/km</div></div></div>`;
+const T=[...a.tests].sort((x,y)=>x.d<y.d?-1:1);
+if(T.length)h+=`<div class=card><h3>Andamento MAS [m/s]</h3>${ch(T.map(t=>t.d.slice(2)),[{c:'var(--a)',d:T.map(t=>t.m/360)}],'')}</div>`;
+return h+dc()+`<button class=x onclick=delAth()>Elimina atleta</button>`}
+/* ZONE */
+function vZone(){const v=MT();if(!v)return noMT;
+let h=`<div class=card><h3>Zone di passo (% MAS training)</h3><table><tr><th>Z</th><th>%</th><th>Passo/km</th><th>km/h</th></tr>${ZP.map(z=>{const hi=z[2]?v*z[2]:null,lo=z[1]?v*z[1]:null;return`<tr><td>${z[0]}</td><td>${z[1]?z[1]*100:'–'}–${z[2]?z[2]*100:'∞'}</td><td>${lo?pf(lo):'∞'} → ${hi?pf(hi):'–'}</td><td>${lo?(lo*3.6).toFixed(1):'–'}–${hi?(hi*3.6).toFixed(1):'∞'}</td></tr>`}).join('')}</table></div>`;
+return h+`<div class=card><h3>Zone di Friel (soglia = MAS training)</h3><table><tr><th>Z</th><th>Passo lento</th><th>Passo veloce</th></tr>${ZF.map(z=>`<tr><td>${z[0]}</td><td>${z[1]?tf(1000/v*z[1]):'–'}</td><td>${z[2]?tf(1000/v*z[2]):'–'}</td></tr>`).join('')}</table><p class=m>Percentuali Friel come nel file: verificale se serve precisione.</p></div>`}
+/* HIIT */
+const D={t:{w:180,wl:100,wh:110,r:180,rl:50,rh:60,s:2,n:8},d:{w:1000,wl:90,wh:100,r:200,rl:60,rh:70,s:2,n:5}};let H={m:'t',...D.t};
+const inp=(k,l)=>`<div><label>${l}</label><input type=number inputmode=decimal value=${H[k]} oninput="H.${k}=+this.value;hr()"></div>`;
+function hm(m){H={m,...D[m]};go()}
+function vHiit(){const t=H.m=='t',u=t?'Tempo [s]':'Distanza [m]';
+return`<div class=seg><button class="${t?'on':''}" onclick="hm('t')">Per tempo</button><button class="${t?'':'on'}" onclick="hm('d')">Per distanza</button></div><div class=card><h3>Lavoro</h3><div class=g3>${inp('w',u)}${inp('wl','Int. min %MAS')}${inp('wh','Int. max %MAS')}</div><h3>Recupero</h3><div class=g3>${inp('r',u)}${inp('rl','Int. min %MAS')}${inp('rh','Int. max %MAS')}</div><h3>Struttura</h3><div class=g2>${inp('s','Serie')}${inp('n','Ripetute')}</div></div><div id=hout></div>`}
+function hc(){const v=MT();if(!v)return null;const{w,wl,wh,r,rl,rh,s,n,m}=H,k=s*n,L=[];let pk,pm,pw;
+const R=(a,b)=>L.push([a,b]);R('Passo lavoro',`${pf(v*wl/100)} – ${pf(v*wh/100)} /km`);R('Passo recupero',`${pf(v*rl/100)} – ${pf(v*rh/100)} /km`);
+if(m=='t'){const a=w*v*wl/100,b=w*v*wh/100,c=r*v*rl/100,d=r*v*rh/100;R('Lavoro per ripetuta',`${n0(a)} – ${n0(b)} m`);R('Recupero per ripetuta',`${n0(c)} – ${n0(d)} m`);R('Distanza totale',`${n0(k*(a+c))} – ${n0(k*(b+d))} m`);R('Durata totale',tf(k*(w+r)));R('Tempo di lavoro (t@vVO2max)',tf(k*w));R('t@VO2max (⅓ del lavoro)',tf(k*w/3));pk=k*(a+b+c+d)/2/1000;pw=k*(a+b)/2/1000;pm=k*(w+r)/60}
+else{const a=w/(v*wh/100),b=w/(v*wl/100),c=r/(v*rh/100),d=r/(v*rl/100);R('Lavoro per ripetuta',`${tf(a)} – ${tf(b)}`);R('Recupero per ripetuta',`${tf(c)} – ${tf(d)}`);R('Distanza totale',`${n0(k*(w+r))} m`);R('Durata totale',`${tf(k*(a+c))} – ${tf(k*(b+d))}`);R('Tempo di lavoro (t@vVO2max)',`${tf(k*a)} – ${tf(k*b)}`);R('t@VO2max (⅓ del lavoro)',`${tf(k*a/3)} – ${tf(k*b/3)}`);pk=k*(w+r)/1000;pw=k*w/1000;pm=k*(a+b+c+d)/2/60}
+return{L,pk,pm,pw}}
+let HC;function hr(){HC=hc();$('#hout').innerHTML=HC?`<div class=card>${HC.L.map(x=>`<div class=r><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}<p><button onclick=addH()>Aggiungi al piano</button></p></div>`:noMT}
+function addH(){const{w,wl,wh,r,rl,rh,s,n,m}=H,u=m=='t'?'s':'m';S.ses.push({id:Date.now(),a:S.sel,d:today(),t:'HIIT',z:'-',pk:HC.pk.toFixed(1),kw:HC.pw.toFixed(2),pm:Math.round(HC.pm),n:`${s}×${n} · ${w}${u} @${wl}–${wh}% / rec ${r}${u} @${rl}–${rh}%`,ak:'',am:'',rpe:''});save();go('s')}
+/* PIANO + VALUTAZIONE */
+function addS(){S.ses.push({id:Date.now(),a:S.sel,d:$('#sd').value||today(),t:$('#st').value,z:$('#sz').value,pk:$('#sk').value,pm:$('#sm').value,n:$('#sn').value,ak:'',am:'',rpe:''});save();go()}
+const upd=(id,k,v)=>{S.ses.find(s=>s.id==id)[k]=v;save();go()},delS=id=>{S.ses=S.ses.filter(s=>s.id!=id);save();go()};
+function ab(s){const ak=+s.ak||0,am=+s.am||0,v=MT();if(!ak)return 0;if(s.ks!==''&&s.ks!=null)return Math.min(+s.ks||0,ak);if(s.t=='HIIT')return+s.pk&&+s.kw?Math.min(ak,ak*s.kw/s.pk):0;return am&&v&&ak*1000/(am*60)>=v?ak:0}
+function ev(s){const o=[],pk=+s.pk,pm=+s.pm,ak=+s.ak,am=+s.am,v=MT();
+if(ak&&pk)o.push(['Volume',Math.round(ak/pk*100)+'% del previsto',Math.abs(ak/pk-1)<.1]);
+if(am&&pm)o.push(['Durata',Math.round(am/pm*100)+'% del previsto',Math.abs(am/pm-1)<.1]);
+if(ak&&am&&s.t!='HIIT'&&v){const sp=ak*1000/(am*60),z=zoneOf(sp/v);o.push(['Passo medio',`${pf(sp)}/km → zona ${z}`+(s.z!='-'?(z==s.z?' ✓':` (previsto ${s.z})`):''),s.z=='-'||z==s.z])}
+if(ak)o.push(['Sopra soglia',`${ab(s).toFixed(1)} km (${Math.round(ab(s)/ak*100)}%)`,true]);
+if(s.rpe)o.push(['RPE',s.rpe+'/10',true]);return o}
+function vSes(){const a=A();if(!a)return noMT;
+let h=`<div class=card><h3>Nuovo allenamento</h3><div class=g2><div><label>Data</label><input id=sd type=date value=${today()}></div><div><label>Tipo</label><select id=st>${['Facile','Lungo','Soglia','Fartlek','Gara','Altro'].map(x=>`<option>${x}</option>`).join('')}</select></div><div><label>Zona prevista</label><select id=sz><option>-</option>${ZP.map(z=>`<option>${z[0]}</option>`).join('')}</select></div><div><label>km previsti</label><input id=sk type=number inputmode=decimal></div><div><label>minuti previsti</label><input id=sm type=number inputmode=numeric></div><div><label>Note</label><input id=sn></div></div><button onclick=addS()>Aggiungi</button><p class=m>Gli allenamenti HIIT si aggiungono dalla scheda HIIT.</p></div>`;
+const L=S.ses.filter(s=>s.a==a.id).sort((x,y)=>x.d<y.d?1:-1),W={};
+L.forEach(s=>{const w=W[wk(s.d)]??={p:0,a:0,b:0},a=ab(s);w.p+=+s.pk||0;w.a+=a;w.b+=(+s.ak||0)-a});
+const K=Object.keys(W).sort().slice(-8);
+if(K.length)h+=`<div class=card><h3>Volume settimanale [km]</h3>${bars(K,W)}<p class=m><span style="color:var(--a)">■</span> sotto soglia &nbsp; <span style="color:#ea580c">■</span> sopra soglia &nbsp; ― previsto<br>Soglia = ritmo MAS training (zona 5a e oltre). Settimane dal lunedì (mm-gg).</p></div>`;
+if(!L.length)h+='<p class=m>Nessun allenamento in piano.</p>';
+return h+L.map(s=>`<div class=card><div class=r><b>${s.d} · ${esc(s.t)}${s.z!='-'?' · Z'+s.z:''}</b><button class=x onclick=delS(${s.id})>✕</button></div><p class=m>Previsto: ${s.pk||'–'} km · ${s.pm||'–'} min${s.n?'<br>'+esc(s.n):''}</p><div class=g2><div><label>km fatti</label><input type=number inputmode=decimal value="${s.ak}" onchange="upd(${s.id},'ak',this.value)"></div><div><label>minuti</label><input type=number inputmode=decimal value="${s.am}" onchange="upd(${s.id},'am',this.value)"></div><div><label>RPE 1-10</label><input type=number min=1 max=10 value="${s.rpe}" onchange="upd(${s.id},'rpe',this.value)"></div><div><label>km sopra soglia (opz.)</label><input type=number inputmode=decimal placeholder=auto value="${s.ks??''}" onchange="upd(${s.id},'ks',this.value)"></div></div>${ev(s).map(e=>`<div class=r><span>${e[0]}</span><b class="${e[2]?'ok':'no'}">${e[1]}</b></div>`).join('')}</div>`).join('')}
+S.sel=S.sel||S.ath[0]?.id;go();
+try{navigator.serviceWorker.register('sw.js')}catch(e){}
+</script></body></html>
