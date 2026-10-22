@@ -5,7 +5,7 @@
 :root{--bg:#f4f6f7;--c:#fff;--t:#14171c;--m:#6b7280;--a:#0369a1;--b:#e1e5e9;--ok:#15803d;--no:#b45309}
 @media(prefers-color-scheme:dark){:root{--bg:#0e1013;--c:#181b20;--t:#eceef1;--m:#9aa1ab;--a:#38bdf8;--b:#2a2f37;--ok:#4ade80;--no:#fbbf24}}
 *{box-sizing:border-box}body{margin:0;font:16px system-ui,sans-serif;background:var(--bg);color:var(--t);padding:env(safe-area-inset-top) 0 calc(64px + env(safe-area-inset-bottom))}
-header{max-width:640px;margin:auto;padding:14px 12px 0;font-weight:800;font-size:22px}#v{max-width:640px;margin:auto;padding:12px}.card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:12px;margin-bottom:12px}
+header{max-width:640px;margin:auto;padding:14px 12px 0;font-weight:800;font-size:22px;display:flex;justify-content:space-between;align-items:baseline}#v{max-width:640px;margin:auto;padding:12px}.card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:12px;margin-bottom:12px}
 h3{margin:4px 0 8px;font-size:15px}label{display:block;font-size:12px;color:var(--m);margin-bottom:2px}.m{color:var(--m);font-size:13px}
 input,select,button{font:inherit;padding:9px;border:1px solid var(--b);border-radius:10px;background:var(--bg);color:var(--t);width:100%;min-width:0}
 button{background:var(--a);color:#fff;border:0;font-weight:600;width:auto;cursor:pointer}button.x{background:none;color:var(--m);padding:2px 8px}
@@ -15,10 +15,10 @@ button{background:var(--a);color:#fff;border:0;font-weight:600;width:auto;cursor
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 4px;border-bottom:1px solid var(--b);text-align:left}
 .r{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--b);font-size:14px}.r b{text-align:right}
 nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--c);border-top:1px solid var(--b);padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;background:none;color:var(--m);border-radius:0;padding:12px 4px;font-size:13px}nav .on{color:var(--a)}
+nav button{flex:1;background:none;color:var(--m);border-radius:0;padding:12px 2px;font-size:12px}nav .on{color:var(--a)}
 .ok{color:var(--ok)}.no{color:var(--no)}
-</style></head><body><header>Tri<span style="color:var(--a)">Lab</span></header><div id="v"></div>
-<nav><button data-t=a onclick="go('a')">Atleta</button><button data-t=z onclick="go('z')">Zone</button><button data-t=h onclick="go('h')">HIIT</button><button data-t=s onclick="go('s')">Piano</button><button data-t=g onclick="go('g')">Gara</button></nav>
+</style></head><body><header><span>Tri<span style="color:var(--a)">Lab</span></span><span id=who style="font-weight:500;font-size:14px;color:var(--m)"></span></header><div id=stat class=m style="max-width:640px;margin:auto;padding:4px 12px 0"></div><div id="v"></div>
+<nav><button data-t=a onclick="go('a')">Atleti</button><button data-t=p onclick="go('p')">Profilo</button><button data-t=z onclick="go('z')">Zone</button><button data-t=h onclick="go('h')">HIIT</button><button data-t=s onclick="go('s')">Piano</button><button data-t=g onclick="go('g')">Gara</button></nav>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let S={ath:[],sel:null,ses:[]};try{S=JSON.parse(localStorage.getItem('runlab'))||S}catch(e){}
@@ -30,9 +30,9 @@ const tf=s=>{s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2
 const ZP=[['1',null,.6],['2',.6,.7],['3',.7,.8],['4',.8,.9],['5a',.9,1],['5b',1,1.1],['5c',1.1,null]];
 const ZF=[['1',null,1.29],['2',1.29,1.14],['3',1.13,1.06],['4',1.05,.99],['5a',1,.97],['5b',.96,.9],['5c',.9,null]];
 const zoneOf=r=>{for(const z of ZP)if((z[1]==null||r>=z[1])&&(z[2]==null||r<z[2]))return z[0]};
-const noMT='<div class=card><p class=m>Aggiungi un atleta e un test MAS 6\' nella scheda Atleta.</p></div>';
+const noMT='<div class=card><p class=m>Scegli un atleta nella scheda Atleti e inserisci un test MAS 6\' nel Profilo.</p></div>';
 let tab='a',pd=0,pI=null,im='',sf='all';
-function go(t){if(t){tab=t;pd=0}$('#v').innerHTML={a:vAth,z:vZone,h:vHiit,s:vSes,g:vRace}[tab]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));if(tab=='h')hr();if(tab=='g')rr()}
+function go(t){if(t){tab=t;pd=0}$('#v').innerHTML={a:vHome,p:vProf,z:vZone,h:vHiit,s:vSes,g:vRace}[tab]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));$('#who').textContent=A()?A().name:'';if(tab=='h')hr();if(tab=='g')rr()}
 /* GRAFICI + DATI */
 function ch(L,ser,u){const all=ser.flatMap(s=>s.d.filter(x=>x!=null));if(L.length<2||!all.length)return'<p class=m>Servono almeno 2 punti per il grafico.</p>';
 const W=320,Hh=120,p=26,mn=Math.min(...all),mx=Math.max(...all),r=mx-mn||1,X=i=>p+i*(W-2*p)/(L.length-1),Y=v=>Hh-p-(v-mn)/r*(Hh-2*p),t=(x,y,s,a)=>`<text x=${x} y=${y} font-size=10 text-anchor=${a} style="fill:var(--m)">${s}</text>`;
@@ -48,18 +48,20 @@ function expC(){const q=x=>'"'+String(x??'').replace(/"/g,'""')+'"',r=[['Atleta'
 function impJ(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.ath)||!Array.isArray(d.ses))throw 0;pI=d;go()}catch(e){pI='err';go()}};r.readAsText(f)}
 const dc=()=>`<div class=card><h3>Dati</h3><div class=row><button onclick=expJ()>Backup JSON</button><button onclick=expC()>Piano CSV</button><button onclick="$('#imp').click()">Importa</button></div>${pI==='err'?'<p class="m no">File non valido</p>':pI?`<p>Sostituire i dati attuali con il backup?</p><div class=row><button onclick="S=pI;pI=null;S.sel=S.sel||S.ath[0]?.id;save();go()">Sì, sostituisci</button><button onclick="pI=null;go()">Annulla</button></div>`:''}<input id=imp type=file accept=".json,application/json" hidden onchange="impJ(this.files[0])"></div>`;
 /* ATLETA */
-function addAth(){const n=($('#an').value||'').trim();if(!n)return;const a={id:Date.now(),name:n,tests:[]};S.ath.push(a);S.sel=a.id;save();go()}
-function delAth(){if(!pd){pd=1;return go()}pd=0;{S.ses=S.ses.filter(s=>s.a!=S.sel);S.ath=S.ath.filter(a=>a.id!=S.sel);S.sel=S.ath[0]?.id;save();go()}}
+function addAth(){const n=($('#an').value||'').trim();if(!n)return;const a={id:Date.now(),name:n,tests:[]};S.ath.push(a);S.sel=a.id;save();go('p')}
+function delAth(){if(!pd){pd=1;return go()}pd=0;{S.ses=S.ses.filter(s=>s.a!=S.sel);S.ath=S.ath.filter(a=>a.id!=S.sel);S.sel=null;save();go('a')}}
 function addT(){const m=+$('#tm').value;if(!m)return;A().tests.push({d:$('#td').value||today(),m});save();go()}
 function delT(i){A().tests.splice(i,1);save();go()}
-function vAth(){const a=A();let h=`<div class=card><label>Atleta</label><div class=row><select onchange="S.sel=this.value;im='';save();go()">${S.ath.map(x=>`<option value=${x.id} ${x.id==S.sel?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div><div class=row style="margin-top:8px"><input id=an placeholder="Nome nuovo atleta"><button onclick=addAth()>Aggiungi</button></div></div>`;
-if(!a)return h+'<p class=m>Crea un atleta per iniziare.</p>'+dc();const m=mas(a);
+const ap=(k,v)=>{const a=A();if(a){a[k]=v;save()}};
+function vProf(){const a=A();if(!a)return noMT;const m=mas(a),f=(k,l,t='text')=>`<div><label>${l}</label><input type=${t} ${t=='number'?'inputmode=decimal ':''}value="${esc(a[k]??'')}" oninput="ap('${k}',this.value)"></div>`;
+let h=`<div class=card><h3>Profilo atleta</h3><div class=g2>${f('name','Nome')}${f('nasc','Data di nascita','date')}${f('peso','Peso [kg]','number')}${f('alt','Altezza [cm]','number')}${f('fcmax','FC max [bpm]','number')}${f('ftp','FTP bici [W]','number')}${f('css','CSS nuoto [/100 m]')}${f('note','Note / obiettivi')}</div></div>`;
+
 h+=`<div class=card><h3>Test MAS 6 minuti</h3><div class=row><input id=td type=date value=${today()}><input id=tm type=number inputmode=numeric placeholder="Metri in 6'"><button onclick=addT()>Aggiungi</button></div>`;
 h+=[...a.tests].map((t,i)=>[t,i]).sort((x,y)=>x[0].d<y[0].d?1:-1).map(([t,i])=>`<div class=r><span>${t.d} · ${t.m} m</span><span>${pf(t.m/360)}/km <button class=x onclick=delT(${i})>✕</button></span></div>`).join('')+'</div>';
 if(m)h+=`<div class=g3><div class=k><label>MAS</label><b>${m.toFixed(2)} m/s</b><div class=m>${pf(m)}/km</div></div><div class=k><label>km/h</label><b>${(m*3.6).toFixed(1)}</b></div><div class=k><label>Velocità training (−5%)</label><b>${(m*.95).toFixed(2)} m/s</b><div class=m>${pf(m*.95)}/km</div></div></div>`;
 const T=[...a.tests].sort((x,y)=>x.d<y.d?-1:1);
 if(T.length)h+=`<div class=card><h3>Andamento MAS [m/s]</h3>${ch(T.map(t=>t.d.slice(2)),[{c:'var(--a)',d:T.map(t=>t.m/360)}],'')}</div>`;
-return h+icc()+dc()+`<button class=x onclick=delAth()>${pd?'Tocca ancora per confermare':'Elimina atleta'}</button>`}
+return h+icc()+`<button class=x onclick=delAth()>${pd?'Tocca ancora per confermare':'Elimina atleta'}</button>`}
 /* ZONE */
 function vZone(){const v=MT();if(!v)return noMT;
 let h=`<div class=card><h3>Corsa · zone di passo (% velocità training)</h3><table><tr><th>Z</th><th>%</th><th>Passo/km</th><th>km/h</th></tr>${ZP.map(z=>{const hi=z[2]?v*z[2]:null,lo=z[1]?v*z[1]:null;return`<tr><td>${z[0]}</td><td>${z[1]?z[1]*100:'–'}–${z[2]?z[2]*100:'∞'}</td><td>${lo?pf(lo):'∞'} → ${hi?pf(hi):'–'}</td><td>${lo?(lo*3.6).toFixed(1):'–'}–${hi?(hi*3.6).toFixed(1):'∞'}</td></tr>`}).join('')}</table></div>`;
@@ -82,16 +84,21 @@ const SP={swim:['Nuoto','m'],bike:['Bici','km'],run:['Corsa','km'],gym:['Palestr
 const SPM=t=>/Run/.test(t)?'run':/Ride|Bike/.test(t)?'bike':/Swim/.test(t)?'swim':/Weight|Workout|Crossfit|Strength|Yoga|Pilates/i.test(t)?'gym':null,fm=(sp,k)=>sp=='swim'?Math.round(k*1000)+' m':(+k).toFixed(1)+' km';
 /* INTERVALS.ICU */
 const IC=()=>{try{return JSON.parse(localStorage.getItem('rl_icu')||'{}')[S.sel]||{}}catch(e){return{}}};
-const icc=()=>{const c=IC();return`<div class=card><h3>Importa da intervals.icu</h3><div class=g2><div><label>Athlete ID (0 = tuo)</label><input id=ii value="${esc(c.id||'0')}"></div><div><label>Periodo</label><select id=iw><option value=90>3 mesi</option><option value=180>6 mesi</option><option value=365>1 anno</option></select></div></div><label>API key (Impostazioni → Developer Settings)</label><input id=ik type=password value="${esc(c.key||'')}" style="margin-bottom:8px"><button onclick=icuSync()>Importa attività</button><p class=m id=imsg>${esc(im)}</p></div>`};
-async function icuSync(){const a=A(),id=$('#ii').value.trim()||'0',key=$('#ik').value.trim(),days=+$('#iw').value,msg=t=>{const e=$('#imsg');if(e)e.textContent=t};
-if(!key)return msg('Inserisci la API key');
-try{const K=JSON.parse(localStorage.getItem('rl_icu')||'{}');K[a.id]={id,key};localStorage.setItem('rl_icu',JSON.stringify(K))}catch(e){}
-const hd={Authorization:'Basic '+btoa('API_KEY:'+key)},B='https://intervals.icu/api/v1/',f=new Date(Date.now()-days*864e5).toISOString().slice(0,10);
-try{msg('Scarico le attività…');const r=await fetch(`${B}athlete/${id}/activities?oldest=${f}&fields=id,name,type,start_date_local,distance,moving_time,perceived_exertion`,{headers:hd});if(!r.ok)throw new Error('HTTP '+r.status);
-const L=(await r.json()).filter(x=>SPM(x.type)&&x.moving_time&&(SPM(x.type)=='gym'||x.distance>(SPM(x.type)=='swim'?100:500))&&!S.ses.some(s=>s.x==x.id&&s.a==a.id)).slice(0,120);let n=0;
-for(const x of L){msg(`Importo ${++n}/${L.length}…`);const sp=SPM(x.type);let iv=[];if(sp=='run')try{const q=await fetch(`${B}activity/${x.id}?intervals=true`,{headers:hd});if(q.ok)iv=((await q.json()).icu_intervals||[]).filter(i=>i.distance>0&&i.average_speed>0).map(i=>[Math.round(i.distance),+i.average_speed.toFixed(2)])}catch(e){}
-S.ses.push({id:Date.now()+n,x:x.id,a:a.id,sp,d:x.start_date_local.slice(0,10),t:sp=='run'?'Corsa':'Importata',z:'-',pk:'',pm:'',n:x.name||'',ak:sp=='gym'?'':(x.distance/1000).toFixed(2),am:(x.moving_time/60).toFixed(1),rpe:x.perceived_exertion||'',ks:'',iv})}
-save();im=`Importate ${L.length} attività nuove.`}catch(e){im='Errore: '+e.message+'. Controlla ID e API key; se il browser blocca la richiesta (CORS) riprova da un altro browser.'}go()}
+const setSt=t=>{const e=$('#stat');if(e)e.textContent=t||''},setIC=(k,v)=>{try{const K=JSON.parse(localStorage.getItem('rl_icu')||'{}');K[S.sel]={...(K[S.sel]||{}),[k]:v};localStorage.setItem('rl_icu',JSON.stringify(K))}catch(e){}};
+const icc=()=>{const c=IC(),a=A();return`<div class=card><h3>Account intervals.icu</h3><div class=g2><div><label>Athlete ID (0 = proprio)</label><input value="${esc(c.id||'0')}" oninput="setIC('id',this.value.trim())"></div><div><label>Primo import</label><select onchange="setIC('days',this.value)">${[[90,'3 mesi'],[180,'6 mesi'],[365,'1 anno']].map(o=>`<option value=${o[0]} ${(c.days||180)==o[0]?'selected':''}>${o[1]}</option>`).join('')}</select></div></div><label>API key (Impostazioni → Developer Settings)</label><input type=password value="${esc(c.key||'')}" oninput="setIC('key',this.value.trim())" style="margin-bottom:8px"><button onclick=icuSync()>Sincronizza ora</button><p class=m>${a.last?'Ultima sincronizzazione: '+a.last.slice(0,10):'Mai sincronizzato'}. Quando scegli l'atleta nella schermata iniziale le nuove attività vengono scaricate in automatico.</p></div>`};
+function pick(id){S.sel=id;save();go('s');icuSync()}
+function vHome(){let h=S.ath.length?'<p class=m>Tocca un atleta per aprire il suo piano e scaricare le nuove attività da intervals.icu.</p>':'<p class=m>Nessun atleta: aggiungine uno per iniziare.</p>';
+h+=S.ath.map(a=>{const n=S.ses.filter(s=>s.a==a.id).length,m=mas(a);return`<div class=card style="cursor:pointer;${a.id==S.sel?'border-color:var(--a)':''}" onclick="pick(${a.id})"><div class=r style="border:0;padding:0"><b>${esc(a.name)}</b><span class=m>${n} attività</span></div><div class=m>${m?'MAS '+pf(m)+'/km':'Nessun test MAS'} · ${a.last?'sync '+a.last.slice(0,10):'mai sincronizzato'}</div></div>`}).join('');
+return h+`<div class=card><h3>Nuovo atleta</h3><div class=row><input id=an placeholder="Nome e cognome"><button onclick=addAth()>Aggiungi</button></div></div>`+dc()}
+const SY=new Set();let uid=0;
+async function icuSync(){const a=A();if(!a||SY.has(a.id))return;const c=IC(),id=c.id||'0',key=c.key;if(!key)return setSt(a.name+': inserisci la API key nel Profilo per scaricare le attività');
+SY.add(a.id);const hd={Authorization:'Basic '+btoa('API_KEY:'+key)},B='https://intervals.icu/api/v1/',f=(a.last?new Date(new Date(a.last)-3*864e5):new Date(Date.now()-(+c.days||180)*864e5)).toISOString().slice(0,10);
+try{setSt(`Sincronizzo ${a.name}…`);const r=await fetch(`${B}athlete/${id}/activities?oldest=${f}&fields=id,name,type,start_date_local,distance,moving_time,perceived_exertion`,{headers:hd});if(!r.ok)throw new Error(r.status==401||r.status==403?'API key o ID non validi':'HTTP '+r.status);
+const all=(await r.json()).filter(x=>SPM(x.type)&&x.moving_time&&(SPM(x.type)=='gym'||x.distance>(SPM(x.type)=='swim'?100:500))&&!S.ses.some(s=>s.x==x.id&&s.a==a.id)),L=all.slice(0,120);let n=0;
+for(const x of L){setSt(`${a.name}: importo ${++n}/${L.length}…`);const sp=SPM(x.type);let iv=[];if(sp=='run')try{const q=await fetch(`${B}activity/${x.id}?intervals=true`,{headers:hd});if(q.ok)iv=((await q.json()).icu_intervals||[]).filter(i=>i.distance>0&&i.average_speed>0).map(i=>[Math.round(i.distance),+i.average_speed.toFixed(2)])}catch(e){}
+S.ses.push({id:Date.now()+ ++uid,x:x.id,a:a.id,sp,d:x.start_date_local.slice(0,10),t:sp=='run'?'Corsa':'Importata',z:'-',pk:'',pm:'',n:x.name||'',ak:sp=='gym'?'':(x.distance/1000).toFixed(2),am:(x.moving_time/60).toFixed(1),rpe:x.perceived_exertion||'',ks:'',iv})}
+if(all.length<=120)a.last=new Date().toISOString();save();setSt(`${a.name}: ${L.length?L.length+' nuove attività'+(all.length>120?' (altre alla prossima sincronizzazione)':''):'già aggiornato'}`);if(L.length&&S.sel==a.id)go()}
+catch(e){setSt(`${a.name}: errore ${e.message}. Controlla ID e API key; se il browser blocca la richiesta (CORS) riprova da un altro browser.`)}finally{SY.delete(a.id)}}
 function zk(s){const ak=+s.ak||0,am=+s.am||0,v=MT(),o={},add=(z,k)=>o[z]=(o[z]||0)+k;let c=0;if(!ak||!v)return o;
 if(s.iv?.length&&s.iv.reduce((q,i)=>q+i[0],0)>=ak*500)s.iv.forEach(i=>{add(zoneOf(i[1]/v),i[0]/1000);c+=i[0]/1000});
 if(ak-c>.01&&am)add(zoneOf(ak*1000/(am*60)/v),ak-c);return o}
