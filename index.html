@@ -14,11 +14,11 @@ button{background:var(--a);color:#fff;border:0;font-weight:600;width:auto;cursor
 .seg{display:flex;gap:6px;margin-bottom:12px}.seg button{flex:1;background:var(--c);color:var(--t);border:1px solid var(--b)}.seg .on{background:var(--a);color:#fff}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 4px;border-bottom:1px solid var(--b);text-align:left}
 .r{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--b);font-size:14px}.r b{text-align:right}
-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--c);border-top:1px solid var(--b);padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;background:none;color:var(--m);border-radius:0;padding:12px 2px;font-size:12px}nav .on{color:var(--a)}
+nav{overflow-x:auto;position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--c);border-top:1px solid var(--b);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1 0 auto;background:none;color:var(--m);border-radius:0;padding:12px 9px;font-size:12px}nav .on{color:var(--a)}
 .ok{color:var(--ok)}.no{color:var(--no)}
 </style></head><body><header><span>Tri<span style="color:var(--a)">Lab</span></span><span id=who style="font-weight:500;font-size:14px;color:var(--m)"></span></header><div id=stat class=m style="max-width:640px;margin:auto;padding:4px 12px 0"></div><div id="v"></div>
-<nav><button data-t=a onclick="go('a')">Atleti</button><button data-t=p onclick="go('p')">Profilo</button><button data-t=z onclick="go('z')">Zone</button><button data-t=h onclick="go('h')">HIIT</button><button data-t=s onclick="go('s')">Piano</button><button data-t=g onclick="go('g')">Gara</button></nav>
+<nav><button data-t=a onclick="go('a')">Atleti</button><button data-t=p onclick="go('p')">Profilo</button><button data-t=z onclick="go('z')">Zone</button><button data-t=h onclick="go('h')">HIIT</button><button data-t=s onclick="go('s')">Piano</button><button data-t=w onclick="go('w')">Palestra</button><button data-t=g onclick="go('g')">Gara</button></nav>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let S={ath:[],sel:null,ses:[]};try{S=JSON.parse(localStorage.getItem('runlab'))||S}catch(e){}
@@ -32,7 +32,7 @@ const ZF=[['1',null,1.29],['2',1.29,1.14],['3',1.13,1.06],['4',1.05,.99],['5a',1
 const zoneOf=r=>{for(const z of ZP)if((z[1]==null||r>=z[1])&&(z[2]==null||r<z[2]))return z[0]};
 const noMT='<div class=card><p class=m>Scegli un atleta nella scheda Atleti e inserisci un test MAS 6\' nel Profilo.</p></div>';
 let tab='a',pd=0,pI=null,im='',sf='all';
-function go(t){if(t){tab=t;pd=0}$('#v').innerHTML={a:vHome,p:vProf,z:vZone,h:vHiit,s:vSes,g:vRace}[tab]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));$('#who').textContent=A()?A().name:'';if(tab=='h')hr();if(tab=='g')rr()}
+function go(t){if(t){tab=t;pd=0}$('#v').innerHTML={a:vHome,p:vProf,z:vZone,h:vHiit,s:vSes,w:vGym,g:vRace}[tab]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));$('#who').textContent=A()?A().name:'';document.querySelector('nav .on')?.scrollIntoView?.({inline:'center',block:'nearest'});if(tab=='h')hr();if(tab=='g')rr()}
 /* GRAFICI + DATI */
 function ch(L,ser,u){const all=ser.flatMap(s=>s.d.filter(x=>x!=null));if(L.length<2||!all.length)return'<p class=m>Servono almeno 2 punti per il grafico.</p>';
 const W=320,Hh=120,p=26,mn=Math.min(...all),mx=Math.max(...all),r=mx-mn||1,X=i=>p+i*(W-2*p)/(L.length-1),Y=v=>Hh-p-(v-mn)/r*(Hh-2*p),t=(x,y,s,a)=>`<text x=${x} y=${y} font-size=10 text-anchor=${a} style="fill:var(--m)">${s}</text>`;
@@ -49,7 +49,7 @@ function impJ(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d
 const dc=()=>`<div class=card><h3>Dati</h3><div class=row><button onclick=expJ()>Backup JSON</button><button onclick=expC()>Piano CSV</button><button onclick="$('#imp').click()">Importa</button></div>${pI==='err'?'<p class="m no">File non valido</p>':pI?`<p>Sostituire i dati attuali con il backup?</p><div class=row><button onclick="S=pI;pI=null;S.sel=S.sel||S.ath[0]?.id;save();go()">Sì, sostituisci</button><button onclick="pI=null;go()">Annulla</button></div>`:''}<input id=imp type=file accept=".json,application/json" hidden onchange="impJ(this.files[0])"></div>`;
 /* ATLETA */
 function addAth(){const n=($('#an').value||'').trim();if(!n)return;const a={id:Date.now(),name:n,tests:[]};S.ath.push(a);S.sel=a.id;save();go('p')}
-function delAth(){if(!pd){pd=1;return go()}pd=0;{S.ses=S.ses.filter(s=>s.a!=S.sel);S.ath=S.ath.filter(a=>a.id!=S.sel);S.sel=null;save();go('a')}}
+function delAth(){if(!pd){pd=1;return go()}pd=0;{S.ses=S.ses.filter(s=>s.a!=S.sel);S.gym=(S.gym||[]).filter(g=>g.a!=S.sel);S.ath=S.ath.filter(a=>a.id!=S.sel);S.sel=null;save();go('a')}}
 function addT(){const m=+$('#tm').value;if(!m)return;A().tests.push({d:$('#td').value||today(),m});save();go()}
 function delT(i){A().tests.splice(i,1);save();go()}
 const ap=(k,v)=>{const a=A();if(a){a[k]=v;save()}};
@@ -102,6 +102,23 @@ catch(e){setSt(`${a.name}: errore ${e.message}. Controlla ID e API key; se il br
 function zk(s){const ak=+s.ak||0,am=+s.am||0,v=MT(),o={},add=(z,k)=>o[z]=(o[z]||0)+k;let c=0;if(!ak||!v)return o;
 if(s.iv?.length&&s.iv.reduce((q,i)=>q+i[0],0)>=ak*500)s.iv.forEach(i=>{add(zoneOf(i[1]/v),i[0]/1000);c+=i[0]/1000});
 if(ak-c>.01&&am)add(zoneOf(ak*1000/(am*60)/v),ak-c);return o}
+/* PALESTRA */
+const GX=['Squat','Panca piana','Stacco','Military press','Trazioni','Rematore','Affondi','Hip thrust','Plank','Dip','Leg press'],G0=()=>({d:'',name:'',min:'',rpe:'',ex:[]});let G=G0(),gp='';
+const mineG=()=>(S.gym||[]).filter(g=>g.a==S.sel).sort((x,y)=>x.d<y.d?1:-1),ton=g=>g.ex.reduce((t,e)=>t+e.s.reduce((q,s)=>q+s.kg*s.r,0),0);
+function gLast(n){const k=n.toLowerCase();let b=null;mineG().forEach(g=>{const e=g.ex.find(e=>e.n.toLowerCase()==k);if(e&&(!b||g.d>b.d))b={d:g.d,s:e.s}});return b}
+function gfill(){const l=gLast($('#gn').value.trim());if(l){const z=l.s[l.s.length-1];$('#gs').value=l.s.length;$('#gr').value=z.r;$('#gk').value=z.kg;$('#gh').textContent='Ultima volta ('+l.d+'): '+l.s.map(s=>s.kg+'×'+s.r).join(', ')}else $('#gh').textContent=''}
+function gAdd(){const n=$('#gn').value.trim(),k=+$('#gk').value||0,r=+$('#gr').value||0,s=Math.max(1,Math.min(20,+$('#gs').value||1));if(!n)return;G.ex.push({n,s:Array.from({length:s},()=>({kg:k,r}))});go()}
+const gPlus=i=>{const s=G.ex[i].s;s.push({...s[s.length-1]});go()},gDelSet=(i,j)=>{G.ex[i].s.splice(j,1);if(!G.ex[i].s.length)G.ex.splice(i,1);go()},gDelEx=i=>{G.ex.splice(i,1);go()},gDel=id=>{S.gym=S.gym.filter(g=>g.id!=id);save();go()};
+function gSave(){if(!G.ex.length)return;S.gym=S.gym||[];S.gym.push({id:Date.now()+ ++uid,a:S.sel,d:G.d||today(),name:G.name||'Palestra',min:G.min,rpe:G.rpe,ex:JSON.parse(JSON.stringify(G.ex))});G=G0();save();go()}
+function vGym(){const a=A();if(!a)return noMT;G.d=G.d||today();const L=mineG(),all=new Set(GX);L.forEach(g=>g.ex.forEach(e=>all.add(e.n)));
+let h=`<div class=card><h3>Nuova sessione</h3><div class=g2><div><label>Data</label><input type=date value="${G.d}" onchange="G.d=this.value"></div><div><label>Nome (es. Gambe)</label><input value="${esc(G.name)}" oninput="G.name=this.value"></div><div><label>Durata [min]</label><input type=number inputmode=numeric value="${G.min}" oninput="G.min=this.value"></div><div><label>RPE 1-10</label><input type=number inputmode=numeric value="${G.rpe}" oninput="G.rpe=this.value"></div></div>`
++G.ex.map((e,i)=>`<div class=card style="background:var(--bg)"><div class=r style="border:0"><b>${esc(e.n)}</b><button class=x onclick=gDelEx(${i})>✕</button></div>${e.s.map((s,j)=>`<div class=row style="margin-bottom:6px;align-items:center"><span class=m style="min-width:42px">Set ${j+1}</span><input type=number inputmode=decimal value="${s.kg}" oninput="G.ex[${i}].s[${j}].kg=+this.value"><span class=m>kg×</span><input type=number inputmode=numeric value="${s.r}" oninput="G.ex[${i}].s[${j}].r=+this.value"><button class=x onclick=gDelSet(${i},${j})>✕</button></div>`).join('')}<button class=x onclick=gPlus(${i})>+ set</button></div>`).join('')
++`<h3>Aggiungi esercizio</h3><input id=gn list=gl placeholder="Esercizio" onchange=gfill()><datalist id=gl>${[...all].map(x=>`<option value="${esc(x)}">`).join('')}</datalist><div class=g3 style="margin-top:8px"><div><label>Set</label><input id=gs type=number inputmode=numeric value=3></div><div><label>Ripetizioni</label><input id=gr type=number inputmode=numeric value=8></div><div><label>Peso [kg]</label><input id=gk type=number inputmode=decimal value=0></div></div><p class=m id=gh></p><div class=row><button onclick=gAdd()>Aggiungi esercizio</button>${G.ex.length?'<button onclick=gSave() style="background:var(--ok)">Salva sessione</button>':''}</div></div>`;
+const hn=[...all].filter(n=>L.some(g=>g.ex.some(e=>e.n==n))).sort();
+if(hn.length){const x=hn.includes(gp)?gp:hn[0],P=L.map(g=>{const e=g.ex.find(e=>e.n==x);return e&&[g.d,Math.max(...e.s.map(s=>s.kg>0?s.kg*(1+s.r/30):s.r)),Math.max(...e.s.map(s=>s.kg)),Math.max(...e.s.map(s=>s.r))]}).filter(Boolean).sort((p,q)=>p[0]<q[0]?-1:1),bw=P.every(p=>!p[2]);
+h+=`<div class=card><h3>Progressione</h3><select onchange="gp=this.value;go()">${hn.map(n=>`<option ${n==x?'selected':''}>${esc(n)}</option>`).join('')}</select>${ch(P.map(p=>p[0].slice(2)),[{c:'var(--a)',d:P.map(p=>p[1])}],'')}<p class=m>${bw?'Corpo libero: massimo di ripetizioni '+Math.max(...P.map(p=>p[3])):'1RM stimato (formula di Epley), kg. Carico massimo: '+Math.max(...P.map(p=>p[2]))+' kg'}.</p></div>`}
+if(!L.length)h+='<p class=m>Nessuna sessione salvata.</p>';
+return h+L.slice(0,15).map(g=>`<div class=card><div class=r style="border:0"><b>${g.d} · ${esc(g.name)}</b><button class=x onclick=gDel(${g.id})>✕</button></div><p class=m>${g.ex.length} esercizi · ${g.ex.reduce((t,e)=>t+e.s.length,0)} set · volume ${n0(ton(g))} kg${g.min?' · '+g.min+' min':''}${g.rpe?' · RPE '+g.rpe:''}</p>${g.ex.map(e=>`<div class=r><span>${esc(e.n)}</span><b>${e.s.map(s=>s.kg+'×'+s.r).join(' · ')}</b></div>`).join('')}</div>`).join('')}
 /* GARA */
 const RF={supersprint:['Super sprint',.4,10,2.5,{sw:'2:00',bk:'28',rn:'5:30',t1:'1',t2:'1'}],sprint:['Sprint',.75,20,5,{sw:'1:55',bk:'30',rn:'5:30',t1:'1',t2:'1'}],olimpico:['Olimpico',1.5,40,10,{sw:'1:50',bk:'30',rn:'5:30',t1:'2',t2:'1'}],'70.3':['Mezzo Ironman 70.3',1.9,90,21.1,{sw:'1:55',bk:'32',rn:'5:45',t1:'3',t2:'2'}],ironman:['Ironman',3.8,180,42.2,{sw:'1:55',bk:'30',rn:'6:15',t1:'4',t2:'3'}],xfull:['Xterra Full (off-road)',1.5,30,10,{sw:'1:55',bk:'20',rn:'6:00',t1:'2',t2:'2'}],xsprint:['Xterra Sprint (off-road)',.75,15,5,{sw:'2:00',bk:'20',rn:'6:00',t1:'2',t2:'2'}],xshort:['Xterra Short Track (off-road)',.4,8,3,{sw:'2:00',bk:'22',rn:'5:45',t1:'1',t2:'1'}],custom:['Personalizzata',1.5,40,10,{sw:'1:50',bk:'30',rn:'5:30',t1:'2',t2:'1'}]};
 const hms=s=>{s=Math.round(s);return Math.floor(s/3600)+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},ps=t=>{const m=String(t).match(/^(\d+):(\d{1,2})$/);return m?+m[1]*60+ +m[2]:0};
