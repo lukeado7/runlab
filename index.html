@@ -4,8 +4,8 @@
 <style>
 :root{--bg:#f4f6f7;--c:#fff;--t:#14171c;--m:#6b7280;--a:#0369a1;--b:#e1e5e9;--ok:#15803d;--no:#b45309}
 @media(prefers-color-scheme:dark){:root{--bg:#0e1013;--c:#181b20;--t:#eceef1;--m:#9aa1ab;--a:#38bdf8;--b:#2a2f37;--ok:#4ade80;--no:#fbbf24}}
-*{box-sizing:border-box}body{margin:0;font:16px system-ui,sans-serif;background:var(--bg);color:var(--t);padding:env(safe-area-inset-top) 0 calc(64px + env(safe-area-inset-bottom))}
-header{max-width:640px;margin:auto;padding:14px 12px 0;font-weight:800;font-size:22px;display:flex;justify-content:space-between;align-items:baseline}#v{max-width:640px;margin:auto;padding:12px}.card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:12px;margin-bottom:12px}
+*{box-sizing:border-box}body{margin:0;font:16px system-ui,sans-serif;background:var(--bg);color:var(--t);padding:env(safe-area-inset-top) 0 calc(24px + env(safe-area-inset-bottom))}
+header{max-width:640px;margin:auto;padding:14px 12px 0;font-weight:800;font-size:22px;display:flex;align-items:center;gap:10px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-bottom:8px}#v{max-width:640px;margin:auto;padding:12px}.card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:12px;margin-bottom:12px}
 h3{margin:4px 0 8px;font-size:15px}label{display:block;font-size:12px;color:var(--m);margin-bottom:2px}.m{color:var(--m);font-size:13px}
 input,select,button{font:inherit;padding:9px;border:1px solid var(--b);border-radius:10px;background:var(--bg);color:var(--t);width:100%;min-width:0}
 button{background:var(--a);color:#fff;border:0;font-weight:600;width:auto;cursor:pointer}button.x{background:none;color:var(--m);padding:2px 8px}
@@ -14,11 +14,14 @@ button{background:var(--a);color:#fff;border:0;font-weight:600;width:auto;cursor
 .seg{display:flex;gap:6px;margin-bottom:12px}.seg button{flex:1;background:var(--c);color:var(--t);border:1px solid var(--b)}.seg .on{background:var(--a);color:#fff}
 table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 4px;border-bottom:1px solid var(--b);text-align:left}
 .r{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--b);font-size:14px}.r b{text-align:right}
-nav{overflow-x:auto;position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--c);border-top:1px solid var(--b);padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1 0 auto;background:none;color:var(--m);border-radius:0;padding:12px 9px;font-size:12px}nav .on{color:var(--a)}
+#menu{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;z-index:20}#menu.open{display:block}
+.panel{position:absolute;top:0;bottom:0;left:0;width:min(82vw,300px);background:var(--c);padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px));overflow-y:auto}
+.panel h4{margin:16px 0 6px;font-size:12px;color:var(--m);text-transform:uppercase;letter-spacing:.05em}
+.panel [data-t]{display:block;width:100%;text-align:left;background:none;color:var(--t);font-weight:500;padding:12px;border-radius:10px}.panel [data-t].on{background:var(--bg);color:var(--a);font-weight:700}
+.hb{background:none;color:var(--t);font-size:22px;line-height:1;padding:6px 10px;border:1px solid var(--b)}
 .ok{color:var(--ok)}.no{color:var(--no)}
-</style></head><body><header><span>Tri<span style="color:var(--a)">Lab</span></span><span id=who style="font-weight:500;font-size:14px;color:var(--m)"></span></header><div id=stat class=m style="max-width:640px;margin:auto;padding:4px 12px 0"></div><div id="v"></div>
-<nav><button data-t=a onclick="go('a')">Atleti</button><button data-t=p onclick="go('p')">Profilo</button><button data-t=d onclick="go('d')">Dashboard</button><button data-t=y onclick="go('y')">Annuale</button><button data-t=s onclick="go('s')">Piano</button><button data-t=w onclick="go('w')">Palestra</button><button data-t=z onclick="go('z')">Zone</button><button data-t=h onclick="go('h')">HIIT</button><button data-t=g onclick="go('g')">Gara</button></nav>
+</style></head><body><header><button class=hb onclick="tm(1)" aria-label="Menu">☰</button><span>Tri<span style="color:var(--a)">Lab</span></span><span id=who style="font-weight:500;font-size:14px;color:var(--m);margin-left:auto;text-align:right"></span></header><div id=stat class=m style="max-width:640px;margin:auto;padding:4px 12px 0"></div><div id="v"></div>
+<div id=menu onclick="if(event.target==this)tm(0)"><div class=panel><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:18px">Menu</b><button class=x onclick="tm(0)" aria-label="Chiudi">✕</button></div><h4>Atleta</h4><button data-t=a onclick="mgo('a')">Atleti</button><button data-t=p onclick="mgo('p')">Profilo</button><button data-t=d onclick="mgo('d')">Dashboard</button><h4>Programmazione</h4><button data-t=y onclick="mgo('y')">Piano annuale</button><button data-t=s onclick="mgo('s')">Piano allenamenti</button><button data-t=g onclick="mgo('g')">Gara</button><h4>Allenamenti</h4><button data-t=w onclick="mgo('w')">Palestra</button><button data-t=z onclick="mgo('z')">Zone corsa</button><button data-t=h onclick="mgo('h')">HIIT corsa</button></div></div>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let S={ath:[],sel:null,ses:[]};try{S=JSON.parse(localStorage.getItem('runlab'))||S}catch(e){}
@@ -32,7 +35,8 @@ const ZF=[['1',null,1.29],['2',1.29,1.14],['3',1.13,1.06],['4',1.05,.99],['5a',1
 const zoneOf=r=>{for(const z of ZP)if((z[1]==null||r>=z[1])&&(z[2]==null||r<z[2]))return z[0]};
 const noMT='<div class=card><p class=m>Scegli un atleta nella scheda Atleti e inserisci un test MAS 6\' nel Profilo.</p></div>';
 let tab='a',pd=0,pI=null,im='',sf='all';
-function go(t){if(t){tab=t;pd=0}$('#v').innerHTML={a:vHome,p:vProf,z:vZone,h:vHiit,s:vSes,w:vGym,g:vRace,d:vDash,y:vPlan}[tab]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));$('#who').textContent=A()?A().name:'';document.querySelector('nav .on')?.scrollIntoView?.({inline:'center',block:'nearest'});if(tab=='h')hr();if(tab=='g')rr()}
+const LBL={a:'Atleti',p:'Profilo',d:'Dashboard',y:'Piano annuale',s:'Piano',g:'Gara',w:'Palestra',z:'Zone corsa',h:'HIIT corsa'},tm=o=>$('#menu').classList.toggle('open',!!o),mgo=t=>{go(t);tm(0);window.scrollTo(0,0)};
+function go(t){if(t){tab=t;pd=0}$('#v').innerHTML={a:vHome,p:vProf,z:vZone,h:vHiit,s:vSes,w:vGym,g:vRace,d:vDash,y:vPlan}[tab]();document.querySelectorAll('#menu [data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));$('#who').textContent=(A()?A().name+' · ':'')+LBL[tab];if(tab=='h')hr();if(tab=='g')rr()}
 /* GRAFICI + DATI */
 function ch(L,ser,u){const all=ser.flatMap(s=>s.d.filter(x=>x!=null));if(L.length<2||!all.length)return'<p class=m>Servono almeno 2 punti per il grafico.</p>';
 const W=320,Hh=120,p=26,mn=Math.min(...all),mx=Math.max(...all),r=mx-mn||1,X=i=>p+i*(W-2*p)/(L.length-1),Y=v=>Hh-p-(v-mn)/r*(Hh-2*p),t=(x,y,s,a)=>`<text x=${x} y=${y} font-size=10 text-anchor=${a} style="fill:var(--m)">${s}</text>`;
@@ -209,7 +213,7 @@ function vRace(){const a=A();if(!a)return noMT;const r=rk(),x=rv(),v=MT(),
 fi=(k,l)=>`<div><label>${l}</label><input value="${esc(x[k])}" oninput="rv().${k}=this.value;save();rr()"></div>`,
 fd=(i,l)=>`<div><label>${l}</label><input type=number inputmode=decimal value="${x.d[i]}" oninput="rv().d[${i}]=+this.value;save();rr()"></div>`;
 return`<div class=card><h3>Pianificatore gara · ${esc(a.name)}</h3><div class=g2><div><label>Formato</label><select onchange="rk().f=this.value;save();go()">${Object.keys(RF).map(k=>`<option value="${k}" ${r.f==k?'selected':''}>${RF[k][0]}</option>`).join('')}</select></div><div><label>Data gara</label><input type=date value="${r.date}" onchange="rk().date=this.value;save();rr()"></div></div><div class=g3>${fd(0,'Nuoto [km]')}${fd(1,'Bici [km]')}${fd(2,'Corsa [km]')}</div><div class=g3>${fi('sw','Nuoto /100 m')}${fi('bk','Bici km/h')}${fi('rn','Corsa /km')}</div><div class=g2>${fi('t1','T1 [min]')}${fi('t2','T2 [min]')}</div><p class=m>${r.f[0]=='x'?'Gara off-road: distanze e dislivelli cambiano molto da evento a evento, modifica i valori. ':''}Le distanze sono indicative e modificabili. Ogni formato conserva i suoi valori.${v?' Velocità training corsa: '+pf(v)+'/km.':''}</p></div><div id=rout></div>`}
-function rr(){const r=rk(),x=rv(),d=x.d,ts=d[0]*10*ps(x.sw),tb=+x.bk>0?d[1]/+x.bk*3600:0,tr=d[2]*ps(x.rn),t=(+x.t1||0)+(+x.t2||0),tt=ts+tb+tr+t*60,dd=r.date?Math.ceil((new Date(r.date)-new Date(today()))/864e5):null;
+function rr(){if(!$('#rout'))return;const r=rk(),x=rv(),d=x.d,ts=d[0]*10*ps(x.sw),tb=+x.bk>0?d[1]/+x.bk*3600:0,tr=d[2]*ps(x.rn),t=(+x.t1||0)+(+x.t2||0),tt=ts+tb+tr+t*60,dd=r.date?Math.ceil((new Date(r.date)-new Date(today()))/864e5):null;
 $('#rout').innerHTML=`<div class=card>${[['Nuoto '+d[0]+' km',hms(ts)],['Bici '+d[1]+' km',hms(tb)],['Corsa '+d[2]+' km',hms(tr)],['Transizioni',t+' min'],['Tempo finale',hms(tt)]].map(y=>`<div class=r><span>${y[0]}</span><b>${y[1]}</b></div>`).join('')}${dd!=null?`<p class=m>${dd>=0?'Mancano '+dd+' giorni alla gara':'Gara passata da '+(-dd)+' giorni'}</p>`:''}</div>`}
 /* PIANO + VALUTAZIONE */
 function addS(){const fs=sf=='all'?'swim':sf,k=$('#sk')?.value;S.ses.push({id:Date.now(),a:S.sel,sp:fs,d:$('#sd').value||today(),t:$('#st').value,z:$('#sz')?.value||'-',pk:k?(fs=='swim'?k/1000:k):'',pm:$('#sm').value,n:$('#sn').value,ak:'',am:'',rpe:''});save();go()}
